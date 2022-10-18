@@ -334,4 +334,4 @@ joinChar _ [] = []
 joinChar _ [x] = x
 joinChar ch (x:xs) = x++[ch]++(joinChar ch xs)
 
-
+---
