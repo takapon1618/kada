@@ -19,7 +19,7 @@ filepath = "./kada.txt"
 daylist :: [Int]
 daylist = [31,28,31,30,31,30,31,31,30,31,30,31]
 
-kamokuEn = ["ma","na","en","hi","ge","bi","te","li","mu","ar","pe"]
+kamokuEn = ["ma","na","en","hi","ge","ph","bi","te","li","mu","ar","pe"]
 kamokuJp = ["数学","国語","英語","歴史","地理","物理","生物","技術","家庭","音楽","美術","体育"]
 
 uru :: Int -> Bool
@@ -86,6 +86,8 @@ showKamoku e = kamokuJp !! (getIndex e kamokuEn)
 showTei :: Char -> String
 showTei t = case t of
               'w' -> "ワーク"
+              'p' -> "プリント"
+              'n' -> "ノート"
               _   -> "なんだそれ"
 
 main :: IO ()
@@ -121,7 +123,9 @@ main = do
        putStr nc
     "q" -> do
        putStrLn "お疲れ様でしたあああああ"
-
+  case s of
+    "q" -> return ()
+    _ -> main
 
 tui :: String -> String -> String
 tui c f = 
@@ -183,10 +187,10 @@ getIndex t (k:ks) = if(t==k) then 0 else 1+(getIndex t ks)
 sousa :: IO String 
 sousa = do
   putStrLn "操作を選択してください"
-  putStrLn "a: 追加, d: 消去, s: 確認, f: 完了, q: 終了, h: 解説"
+  putStrLn "a: 追加, d: 消去, f: 完了, q: 終了"
   putStr "> "
   d <- getLine
-  let b = elem d ["a","d","s","f","q","h"]
+  let b = elem d ["a","d","f","q"]
   if b then return d else do
     putStrLn "ちが～う！ そうじゃな～い！"
     sousa
