@@ -98,34 +98,49 @@ main = do
   showKada c
   s <- sousa
   putStrLn s
-  case s of
+  iq <- case s of
     "a" -> do
-      com <- sequence [kamoku, syos, nama, hiz, page] >>= return.concat
-      let nc = tui c com
-      fileWrite nc
-      putStrLn "追加されたよ！"
-      putStr nc
+      comM <- kamoku >>= syos >>= nama >>= hiz >>= page
+      let iq' = comM==Nothing
+      if iq' then return iq' else do
+        let Just com = comM
+            nc = tui c com
+        fileWrite nc
+        putStrLn "追加されたよ！"
+        putStr nc
+        return iq'
     "d" -> do
-      com <- sequence [kamoku, syos, nama] >>= return.concat
-      let nc = kesi c com
-      if (nc==c) then do
-         putStrLn "そんな課題ないよ～"
-                 else do
-         fileWrite nc
-         putStrLn "消去されたよ！！！"
-         putStr nc
+      comM <- kamoku >>= syos >>= nama
+      let iq' = comM==Nothing
+      if iq' then return iq' else do
+        let Just com = comM
+            nc = kesi c com
+        if (nc==c) then do
+          putStrLn "そんな課題ないよ～"
+          return iq'
+                   else do
+          fileWrite nc
+          putStrLn "消去されたよ！！！"
+          putStr nc
+          return iq'
     "f" -> do
        let allKesu = putStrLn "『all』って入力すると全部消せるよ！！"
-       com <- sequence [kamoku, syos, nama, allKesu>>page] >>= return.concat
-       let nc = kan c com
-       fileWrite nc
-       putStrLn "変更したよおお！！ おめでと～～☆"
-       putStr nc
+           hyouji = showKada c
+       com' <- kamoku >>= syos >>= nama
+       allKesu >> hyouji
+       comM <- page com'
+       let iq' = comM==Nothing
+       if iq' then return iq' else do
+        let Just com = comM
+            nc = kan c com
+        fileWrite nc
+        putStrLn "変更したよおお！！ おめでと～～☆"
+        putStr nc
+        return iq'
     "q" -> do
        putStrLn "お疲れ様でしたあああああ"
-  case s of
-    "q" -> return ()
-    _ -> main
+       return True
+  if iq then return () else main
 
 tui :: String -> String -> String
 tui c f = 
@@ -195,7 +210,7 @@ sousa = do
     putStrLn "ちが～う！ そうじゃな～い！"
     sousa
 
-kamoku :: IO String
+kamoku :: IO (Maybe String)
 kamoku = do
   putStrLn "教科を選択してください"
   putStrLn "ma: 数学, na: 国語, en: 英語, hi: 歴史, ge: 地理, ph: 物理"
@@ -203,41 +218,47 @@ kamoku = do
   putStr "> "
   d <- getLine
   let b = elem d ["ma","na","en","hi","ge","ph","bi","te","li","mu","ar","pe"]
-  if b then return d else do
-    putStrLn "打ち間違ってない？"
-    kamoku
+  if b then return (Just d) else
+    if (d=="q") then return Nothing else do
+      putStrLn "打ち間違ってない？"
+      kamoku
 
-syos :: IO String
-syos = do
+syos :: Maybe String -> IO (Maybe String)
+syos Nothing = return Nothing
+syos (Just s) = do
   putStrLn "提出する物を選択してください"
   putStrLn "w: ワーク, p: プリント, n: ノート"
   putStr "> "
   d <- getLine
   let b = elem d ["w","p","n"]
-  if b then return d else do
-    putStrLn "打ち間違ってない？"
-    syos 
+  if b then return (Just (s++d)) else do
+    if (d=="q") then return Nothing else do
+      putStrLn "打ち間違ってない？"
+      syos (Just s) 
 
-nama :: IO String
-nama = do
+nama :: Maybe String -> IO (Maybe String)
+nama Nothing = return Nothing
+nama (Just s)= do
   putStrLn "名前ヲ入力セヨ"
   putStr "> "
   d <- getLine
-  return (d++";")
+  if (d=="q") then return Nothing else return (Just (s++d++";"))
 
-hiz :: IO String
-hiz = do
+hiz :: Maybe String -> IO (Maybe String)
+hiz Nothing = return Nothing
+hiz (Just s) = do
   putStrLn "提出期限を入力してください"
   putStr "> "
   d <- getLine
-  return (d++";")
+  if (d=="q") then return Nothing else return (Just (s++d++";"))
 
-page :: IO String
-page = do
+page :: Maybe String -> IO (Maybe String)
+page Nothing = return Nothing
+page (Just s)= do
   putStrLn "課題のページを入力してください"
   putStr "> "
   d <- getLine
-  return (d++";")
+  if (d=="q") then return Nothing else return (Just (s++d++";"))
 
 toList :: (Enum a,Ord a) => a -> a -> [a]
 toList a b = if(a==b) then [a] else
