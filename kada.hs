@@ -127,7 +127,7 @@ main = do
        let allKesu = putStrLn "『all』って入力すると全部消せるよ！！"
            hyouji = showKada c
        com' <- kamoku >>= syos >>= nama
-       allKesu >> hyouji
+       if (com'==Nothing) then return () else allKesu >> hyouji
        comM <- page com'
        let iq' = comM==Nothing
        if iq' then return iq' else do
