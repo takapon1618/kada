@@ -137,6 +137,22 @@ main = do
         putStrLn "変更したよおお！！ おめでと～～☆"
         putStr nc
         return iq'
+    "c" -> do
+       putStrLn "宿題の期限変更するよ！！"
+       let hyouji = showKada c
+       com' <- kamoku >>= syos >>= nama
+       if (com'==Nothing) then return () else hyouji
+       comM <- hiz com'
+       let iq' = comM==Nothing
+       if iq' then return iq' else do
+         let Just com = comM
+             nc = hen c com
+         fileWrite nc
+         putStrLn "期限を変更したよ！！"
+         putStrLn "がんばってね！！"
+         getLine
+         putStr nc
+         return iq'
     "q" -> do
        putStrLn "お疲れ様でしたあああああ"
        return True
@@ -163,6 +179,17 @@ kesi c f =
 kesu :: Int -> [a] -> [a]
 kesu i cs = take i cs ++ drop (i+1) cs 
 
+hen :: String -> String -> String
+hen c f =
+  let fw = wake ';' f
+      sb = head fw
+      hi = last fw
+      cs = lines c
+      sln = map (head . (wake ';')) cs
+      is = elem sb sln
+      i = if is then getIndex sb sln else (-1)
+   in if is then unlines$hee i hi cs else c 
+
 kan :: String -> String -> String
 kan c f =
   let fw = wake ';' f
@@ -171,8 +198,17 @@ kan c f =
       cs = lines c
       sln = map (head . (wake ';')) cs
       is = elem sb sln
-      id = if is then getIndex sb sln else (-1)
-   in if is then unlines$kae id fl cs else c
+      i = if is then getIndex sb sln else (-1)
+   in if is then unlines$kae i fl cs else c
+
+
+hee :: Int -> String -> [String] -> [String]
+hee i hi cs =
+  let od = cs!!i
+      wod = wake ';' od
+      wpa = drop 2 wod
+      nd = (head wod)++";"++hi++";"++(joinChar ';' wpa)
+   in take i cs ++ [nd] ++ drop (i+1) cs
 
 kae :: Int -> String -> [String] -> [String]
 kae i fl cs =
@@ -202,10 +238,10 @@ getIndex t (k:ks) = if(t==k) then 0 else 1+(getIndex t ks)
 sousa :: IO String 
 sousa = do
   putStrLn "操作を選択してください"
-  putStrLn "a: 追加, d: 消去, f: 完了, q: 終了"
+  putStrLn "a: 追加, d: 消去, c: 変更, f: 完了, q: 終了"
   putStr "> "
   d <- getLine
-  let b = elem d ["a","d","f","q"]
+  let b = elem d ["a","c","d","f","q"]
   if b then return d else do
     putStrLn "ちが～う！ そうじゃな～い！"
     sousa
