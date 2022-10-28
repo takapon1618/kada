@@ -68,6 +68,10 @@ showka ka = do
       lzen = length zenka
       lima = length imaka
       hmd = hmDays today kigen
+      hmds = if ik then "" else 
+              if(hmd==0) then " -- 今日!" else
+                if(hmd<0) then " -- " ++ (show (-hmd)) ++ "日前!!!!!!!!!!!" 
+                          else " -- あと" ++ (show hmd) ++ "日"
       lzeni = fromIntegral lzen
       limai = fromIntegral lima
       par = floor$(lzeni-limai)/lzeni*100
@@ -75,8 +79,8 @@ showka ka = do
       bar = "|" ++ (concat$replicate ba "=>") 
                 ++ (concat$replicate (10-ba) "--") ++ "|"
       hyouzi = "\n" ++ kamoku ++ ":" ++ tei ++ ":" ++ nama ++"\n" ++
-               kas3 ++ "\n" ++ bar ++" 期限:" ++ kigen ++ " -- あと"++
-               (show hmd) ++ "日"++" (" ++ (show par) ++ "% 完了)"
+               kas3 ++ "\n" ++ bar ++" 期限:" ++ kigen ++ hmds ++ 
+               " (" ++ (show par) ++ "% 完了)"
   putStrLn hyouzi
       
 
@@ -127,7 +131,7 @@ main = do
        let allKesu = putStrLn "『all』って入力すると全部消せるよ！！"
            hyouji = showKada c
        com' <- kamoku >>= syos >>= nama
-       if (com'==Nothing) then return () else allKesu >> hyouji
+       if (com'==Nothing) then return () else hyouji >> allKesu
        comM <- page com'
        let iq' = comM==Nothing
        if iq' then return iq' else do
